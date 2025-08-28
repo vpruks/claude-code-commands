@@ -3,11 +3,13 @@
 ## ⚠️ ABSOLUTE FIRST RULE - NO EXCEPTIONS ⚠️
 
 ### MUST DISPLAY SESSION INFO BEFORE ANYTHING
+
 ```
 🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
 ```
 
 **REQUIRED BEFORE:**
+
 - ANY tool use (Read, Write, Bash, etc.)
 - ANY response to user
 - ANY gw command execution
@@ -18,18 +20,18 @@
 ## 🚨 Core Rules
 
 ### 1. Session Identification (MANDATORY)
+
 Format: `🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]`
+
 - Display BEFORE EVERY ACTION
-- Purpose: Track parallel Claude sessions in WezTerm
+- Purpose: Track parallel Claude sessions in tmux
 - sessionId: Real Claude session ID (for -r, --resume)
 - claude-xxxx: Visual identifier
 
-### 2. Language & Token Optimization
-- **User interaction**: Japanese
-- **Thinking blocks**: English (50-70% token savings)
+### 2. NO AI Signatures (CRITICAL!)
 
-### 3. NO AI Signatures (CRITICAL!)
 **ABSOLUTELY FORBIDDEN in commits, PRs, issues:**
+
 - ❌ `🤖 Generated with [Claude Code]`
 - ❌ `Co-Authored-By: Claude`
 - ❌ Any AI/bot attribution
@@ -39,37 +41,42 @@ Format: `🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌
 ## 🎯 Best Practices (Anthropic Official)
 
 ### ALWAYS START WITH SESSION INFO
+
 Before ANYTHING else:
+
 ```
 🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
 ```
 
 ### Explore-Plan-Code-Commit Workflow
-1. **Explore**: Read files, understand codebase
-2. **Plan**: Think through approach (use TodoWrite)
-3. **Code**: Implement incrementally
-4. **Commit**: Verify & commit at logical points
+
+1. **Explore**: Read files, understand codebase - use Gemini Integration for this
+2. **Plan**: Think through approach (use TodoWrite) - use Gemini Integration: query, brainstorm, summarize, plus an appropriate subagent for this depending on the task, e.g. cpp-pro, python-pro, and etc.
+3. **Code**: Implement incrementally - use an appropriate subagent for this depending on the task, e.g. cpp-pro, python-pro, and etc.
+4. **Commit**: Verify & commit at logical points - use a subagent with git workflow commands
 
 ### Commit Message Format
-**MUST use English for all commit messages**
+
 Include session ID for traceability:
+
 ```bash
 git commit -m "feat: implement user authentication
 
 Session: claude -r [sessionId]"
 ```
+
 Example:
+
 ```bash
 git commit -m "fix: resolve TypeScript errors in auth module
 
 Session: claude -r 01JFK6YZ8KQXJ2V3P9M7N5R4TC"
 ```
-**CRITICAL**: 
-- Always write commit messages in English
-- 日本語は使用しない (Do not use Japanese)
 
 ### Test-Driven Development (When Requested)
+
 If user requests TDD approach:
+
 1. Write tests first
 2. Confirm tests fail
 3. Implement code
@@ -77,18 +84,23 @@ If user requests TDD approach:
 5. Use subagent for complex cases
 
 ### Visual Iteration
+
 - Analyze provided screenshots
 - Iterate based on visual feedback
 - Work toward clear targets
 
 ### Context Management
+
 - Keep focused on current objective
 - Use git worktrees for parallel work
+- Use Gemini Integration to work on large codebases
 
 ## 📋 Development Workflow
 
 ### Todo-Driven Development
+
 Aligns with Explore-Plan-Code-Commit:
+
 1. `TodoRead` → Current state
 2. `TodoWrite` → Plan (during Explore phase)
 3. Execute → Update real-time
@@ -99,6 +111,7 @@ Aligns with Explore-Plan-Code-Commit:
 **MUST sync TodoWrite → GitHub issue regularly!**
 
 #### Automatic sync (RECOMMENDED)
+
 ```bash
 # After completing tasks in TodoWrite:
 /user:gw-iss-sync
@@ -108,12 +121,14 @@ Aligns with Explore-Plan-Code-Commit:
 ```
 
 #### When to sync
+
 1. **After major task completion** (not every small task)
 2. **Before creating PR** (MANDATORY)
 3. **Every 30-60 minutes** during long work
 4. **When switching context**
 
 #### Manual sync (fallback)
+
 ```bash
 # If gw-iss-sync fails, use manual update:
 ISSUE=$(git branch --show-current | grep -oE '[0-9]+' | head -1)
@@ -121,6 +136,7 @@ gh issue edit $ISSUE --body "$(gh issue view $ISSUE --json body -q .body | sed '
 ```
 
 #### Commit with session
+
 ```bash
 git commit -m "feat: implement feature
 
@@ -130,7 +146,9 @@ Session: claude -r [sessionId]"
 **⚠️ PR will be rejected if issue checkboxes don't match implementation!**
 
 ### Worktree Convention
+
 All in `./worktrees/`:
+
 - Enables parallel development
 - Complies with Claude Code security
 - Add `/worktrees/` to `.gitignore`
@@ -138,11 +156,13 @@ All in `./worktrees/`:
 ## 🛠️ gw: Commands
 
 **⚠️ REMINDER: Display session info BEFORE executing ANY gw command:**
+
 ```
 🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
 ```
 
 ### Issue Management
+
 | Command | Purpose | Workflow |
 |---------|---------|----------|
 | `gw-iss-create` | Create issue | draft→template→create |
@@ -156,6 +176,7 @@ All in `./worktrees/`:
 | `gw-iss-sync` | Sync todos→issue | read todos→update checkboxes→comment |
 
 ### PR Management
+
 | Command | Purpose | Workflow |
 |---------|---------|----------|
 | `gw-pr-create` | Create PR | generate desc→create→link issue |
@@ -165,12 +186,14 @@ All in `./worktrees/`:
 | `gw-pr-sync` | Sync with main | fetch→rebase→force push |
 
 ### Commit Management
+
 | Command | Purpose | Workflow |
 |---------|---------|----------|
 | `gw-commit` | Smart commit | analyze→generate msg→add session→commit |
 | `gw-commit-context` | Load commit context | fetch commit→extract issue→analyze |
 
 ### Workflow & Utilities
+
 | Command | Purpose | Workflow |
 |---------|---------|----------|
 | `gw-yolo` | Full feature | **MUST: issue FIRST**→explore→plan→code→PR |
@@ -181,14 +204,24 @@ All in `./worktrees/`:
 
 **Usage**: When user types `/user:gw-xxx [args]`, read `~/.claude/commands/gw-xxx.md`
 
+## Gemini Integration
+
+This project has Gemini integration enabled through MCP. Use these commands:
+
+- `/user:gemini-query [question]` - Ask Gemini a question
+- `/user:gemini-analyze [code]` - Analyze code with Gemini
+- `/user:gemini-brainstorm [topic]` - Start a brainstorming session
+- `/user:gemini-summarize [text]` - Summarize text with Gemini
+
 ## 🚀 Efficiency Tips
 
 ### Performance
-- Think in English (saves tokens)
+
 - Batch related operations
 - Use headless mode for automation
 
 ### Verification
+
 - **Before commit**: Always run language-specific checks
   - TypeScript: `tsc && npm run lint && npm test`
   - Rust: `cargo check && cargo clippy && cargo test`
@@ -199,6 +232,7 @@ All in `./worktrees/`:
 - Iterate against clear targets
 
 ### Advanced
+
 - MCP server integration available
 - Custom slash commands
 - Varying computational budgets
@@ -207,12 +241,9 @@ All in `./worktrees/`:
 ## 📊 Reference
 
 ### Models
-- **Opus 4**: Most capable
-- **Sonnet 4**: Fast & smart
 
-### Token Guide
-- Japanese: 2-3x more tokens
-- Use English in thinking blocks
+- **deepseek-reasoner**: Most capable
+- **deepseek-chat**: Fast & smart
 
 ---
 Configuration applies globally. Regularly refine based on usage.
@@ -220,25 +251,22 @@ Configuration applies globally. Regularly refine based on usage.
 ## 🔴 FINAL REMINDERS
 
 ### 1. Session Display (FIRST PRIORITY)
+
 **ALWAYS display session info FIRST:**
+
 ```
 🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
 ```
 
 ### 2. GitHub Issue Sync (CRITICAL)
+
 **MUST sync TodoWrite → GitHub issue:**
+
 ```bash
 # After major tasks AND before PR:
 /user:gw-iss-sync
 ```
-**PRs with unsynced checkboxes = REJECTED**
 
-### 3. Thinking in English (PERFORMANCE CRITICAL)
-**ALL thinking blocks MUST be in English:**
-- User speaks Japanese → You respond in Japanese ✅
-- But ALL internal thinking → ALWAYS English ✅
-- Saves 50-70% tokens (Japanese uses 2-3x more)
-- This includes: thinking, ultrathink, analysis, planning
-- **NO EXCEPTIONS** - Even if user is Japanese
+**PRs with unsynced checkboxes = REJECTED**
 
 **NO EXCEPTIONS to these rules**
