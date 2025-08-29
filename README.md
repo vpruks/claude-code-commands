@@ -129,10 +129,10 @@ All commands accept arguments with or without quotes:
   - `-l, --level [level]` - Thinking depth: think, "think hard", "think harder", ultrathink (default)
 - **`gw-iss-run-parallel [issue#]`** - Create multiple parallel implementations with tmux (with push/PR)
   - `-p, --parallel [2-8]` - Number of parallel implementations (default: 3)
-  - `-m, --model [opus|sonnet]` - Model to use for Claude instances (default: opus)
+  - `-m, --model [deepseek-reasoner|deepseek-chat]` - Model to use for Claude instances (default: deepseek-reasoner)
 - **`gw-iss-implement-parallel [issue#]`** - Create multiple parallel implementations with tmux (local only, no push/PR)
   - `-p, --parallel [2-8]` - Number of parallel implementations (default: 3)
-  - `-m, --model [opus|sonnet]` - Model to use for Claude instances (default: opus)
+  - `-m, --model [deepseek-reasoner|deepseek-chat]` - Model to use for Claude instances (default: deepseek-reasoner)
 - **`gw-iss-status [issue#]`** - Check progress of parallel implementations
 - **`gw-iss-sync [issue#]`** - Sync TodoWrite tasks with GitHub issue checkboxes
   - Automatically updates GitHub issue checkboxes based on TodoWrite state
@@ -193,12 +193,12 @@ All commands accept arguments with or without quotes:
 
 # Parallel development (with auto push/PR)
 /user:gw-iss-run-parallel #33 -p 5  # Create 5 parallel implementations
-/user:gw-iss-run-parallel #33 -m sonnet  # Use Sonnet model for all instances
-/user:gw-iss-run-parallel #33 -p 4 -m sonnet  # 4 instances with Sonnet
+/user:gw-iss-run-parallel #33 -m deepseek-chat # Use deepseek-chat model for all instances
+/user:gw-iss-run-parallel #33 -p 4 -m deepseek-chat # 4 instances with deepseek-chat
 
 # Parallel development (local only)
 /user:gw-iss-implement-parallel #33 -p 5  # Create 5 parallel implementations locally
-/user:gw-iss-implement-parallel #33 -m sonnet  # Use Sonnet model
+/user:gw-iss-implement-parallel #33 -m deepseek-chat # Use deepseek-chat model
 
 # Draft PRs
 /user:gw-pr-create -d
@@ -268,11 +268,11 @@ All commands create worktrees in `./worktrees/` subdirectory with branch-based n
 ### 2. Parallel Development
 Work on multiple implementations simultaneously:
 ```bash
-# Create 3 parallel implementations (Opus by default)
+# Create 3 parallel implementations (deepseek-reasoner by default)
 /user:gw-iss-run-parallel 33 -p 3
 
-# Use Sonnet model for faster responses
-/user:gw-iss-run-parallel 33 -p 3 -m sonnet
+# Use deepseek-chat model for faster responses
+/user:gw-iss-run-parallel 33 -p 3 -m deepseek-chat
 
 # Opens tmux with:
 # - Terminal 1: ./worktrees/feat-33-auth-claude1/ (with selected model)
@@ -289,13 +289,13 @@ Branches use hyphens instead of slashes for perfect worktree compatibility:
 ### 4. Session Display
 Every command shows session context for WezTerm panel management:
 ```
-🌿 Branch: main | 🌲 Worktree: main | 🆔 01JFK6YZ8KQXJ2V3P9M7N5R4TC | 📌 claude-1234 | 🤖 Opus
+🌿 Branch: main | 🌲 Worktree: main | 🆔 01JFK6YZ8KQXJ2V3P9M7N5R4TC | 📌 claude-1234 | 🤖 deepseek-reasoner
 ```
 
 The session display includes:
 - 🆔 Actual Claude Code session ID (use with `claude -r` to resume)
 - 📌 Visual identifier for distinguishing WezTerm panels
-- 🤖 Current model (Opus/Sonnet) in each parallel terminal
+- 🤖 Current model (deepseek-reasoner/deepseek-chat) in each parallel terminal
 
 ### 5. TodoWrite Integration
 Automatic task synchronization between Claude's TodoWrite and GitHub issue checkboxes.

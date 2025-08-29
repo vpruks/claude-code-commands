@@ -2,7 +2,7 @@ Create multiple parallel implementations with tmux for trying different approach
 
 ISSUE_NUMBER: Issue number (e.g., 123 or #123)
 -p, --parallel [2-8]: Number of parallel implementations (default: 3)
--m, --model [opus|sonnet]: Model to use for Claude instances (default: opus)
+-m, --model [deepseek-reasoner|deepseek-chat]: Model to use for Claude instances (default: deepseek-chat)
 
 ## Purpose
 
@@ -16,16 +16,16 @@ Create multiple worktrees to implement the same issue with different approaches,
 ## Usage
 
 ```bash
-# Default: create 3 parallel implementations with Opus
+# Default: create 3 parallel implementations with deepseek-reasoner
 /user:gw-iss-run-parallel 33
 
 # Specify number of parallel implementations
 /user:gw-iss-run-parallel 33 -p 5
 /user:gw-iss-run-parallel #33 --parallel 4
 
-# Use Sonnet model for all instances
-/user:gw-iss-run-parallel 33 -m sonnet
-/user:gw-iss-run-parallel 33 --model sonnet -p 4
+# Use deepseek-chat model for all instances
+/user:gw-iss-run-parallel 33 -m deepseek-chat
+/user:gw-iss-run-parallel 33 --model deepseek-chat -p 4
 ```
 
 ## Workflow
@@ -45,7 +45,7 @@ FLAGS=$(echo "$ARGUMENTS" | awk '{$1=""; print $0}')
 # Default parallel count
 PARALLEL_COUNT=3
 # Default model
-MODEL="opus"
+MODEL="deepseek-reasoner"
 
 # Parse flags
 i=1
@@ -62,7 +62,7 @@ for arg in $FLAGS; do
       # Get next argument as model
       MODEL=$(echo "$FLAGS" | awk -v i=$((i+1)) '{print $i}')
       if [ -z "$MODEL" ]; then
-        MODEL="opus"
+        MODEL="deepseek-reasoner"
       fi
       ;;
   esac
@@ -76,8 +76,8 @@ if ! [[ "$PARALLEL_COUNT" =~ ^[0-9]+$ ]] || [ $PARALLEL_COUNT -lt 2 ] || [ $PARA
 fi
 
 # Validate model
-if [[ "$MODEL" != "opus" && "$MODEL" != "sonnet" ]]; then
-  echo "❌ Invalid model. Must be 'opus' or 'sonnet'."
+if [[ "$MODEL" != "deepseek-reasoner" && "$MODEL" != "deepseek-chat" ]]; then
+  echo "❌ Invalid model. Must be 'deepseek-reasoner' or 'deepseek-chat'."
   exit 1
 fi
 
@@ -123,7 +123,7 @@ for i in $(seq 1 $PARALLEL_COUNT); do
   VARIANT_BRANCH="$BRANCH_BASE-claude$i"
   # Worktree path is same as branch name (no conversion needed!)
   VARIANT_WORKTREE="./worktrees/$VARIANT_BRANCH"
-  
+
   # Check if worktree exists
   if git worktree list | grep -q "$VARIANT_WORKTREE"; then
     echo "  ⚠️  claude$i: Already exists at $VARIANT_WORKTREE"
@@ -131,20 +131,20 @@ for i in $(seq 1 $PARALLEL_COUNT); do
     # Create new worktree
     git worktree add -b "$VARIANT_BRANCH" "$VARIANT_WORKTREE" > /dev/null 2>&1
     echo "  ✅ claude$i: Created $VARIANT_BRANCH @ $VARIANT_WORKTREE"
-    
+
     # Setup worktree
     (
       cd "$VARIANT_WORKTREE"
-      
+
       # Install dependencies
       echo "  📦 claude$i: Installing dependencies..."
       pnpm install > /dev/null 2>&1
-      
+
       # Link .env files
       if [ -f "../../.env" ]; then
         ln -s ../../.env .env
       fi
-      
+
       # Run gw-env-sync if available
       if [ -f ~/.claude/commands/gw-env-sync.md ]; then
         echo "  🔗 claude$i: Syncing .env files..."
@@ -152,7 +152,7 @@ for i in $(seq 1 $PARALLEL_COUNT); do
       fi
     )
   fi
-  
+
   WORKTREE_PATHS+=("$VARIANT_WORKTREE")
 done
 ```
@@ -207,25 +207,25 @@ for i in $(seq 0 $((PARALLEL_COUNT - 1))); do
   PANE_INDEX=$i
   VARIANT_NUM=$((i + 1))
   WORKTREE_PATH="${WORKTREE_PATHS[$i]}"
-  
+
   # Send commands to each pane
   tmux send-keys -t "$SESSION_NAME:0.$PANE_INDEX" "cd $WORKTREE_PATH" C-m
   sleep 0.5
-  
+
   # Launch Claude with model
   CLAUDE_CMD="claude"
-  if [ "$MODEL" = "sonnet" ]; then
-    CLAUDE_CMD="claude --model claude-3-5-sonnet-20241022"
+  if [ "$MODEL" = "deepseek-chat" ]; then
+    CLAUDE_CMD="claude --model deepseek-chat"
   fi
   tmux send-keys -t "$SESSION_NAME:0.$PANE_INDEX" "$CLAUDE_CMD" C-m
   sleep 2
-  
+
   # Create variant-specific prompt
   VARIANT_TEXT="This is implementation variant $VARIANT_NUM of $PARALLEL_COUNT. Try a different approach than other variants."
-  
+
   # Send instruction to Claude
   tmux send-keys -t "$SESSION_NAME:0.$PANE_INDEX" "$VARIANT_TEXT Then run: /user:gw-iss-run $ISSUE_NUM" C-m
-  
+
   echo "  ✅ claude$VARIANT_NUM: Claude ($MODEL) launched in $WORKTREE_PATH"
 done
 ```
@@ -253,7 +253,7 @@ tmux attach-session -t "$SESSION_NAME"
 ```
 ◆ [main] claude-1234 @ main
 
-🚀 Creating 3 parallel implementations for issue #1 (model: opus)
+🚀 Creating 3 parallel implementations for issue #1 (model: deepseek-reasoner)
 📋 Issue: Improve product image display
 🤔 Analyzing issue to generate branch name...
 
@@ -264,9 +264,9 @@ tmux attach-session -t "$SESSION_NAME"
 
 🖥️  Creating tmux session: claude-parallel-1
 🤖 Launching Claude instances...
-  ✅ claude1: Claude (opus) launched in ./worktrees/feat-1-improve-images-claude1
-  ✅ claude2: Claude (opus) launched in ./worktrees/feat-1-improve-images-claude2
-  ✅ claude3: Claude (opus) launched in ./worktrees/feat-1-improve-images-claude3
+  ✅ claude1: Claude (deepseek-reasoner) launched in ./worktrees/feat-1-improve-images-claude1
+  ✅ claude2: Claude (deepseek-reasoner) launched in ./worktrees/feat-1-improve-images-claude2
+  ✅ claude3: Claude (deepseek-reasoner) launched in ./worktrees/feat-1-improve-images-claude3
 
 ✨ All set! Attaching to tmux session...
 
@@ -286,7 +286,7 @@ tmux attach-session -t "$SESSION_NAME"
 - **Environment setup**: Links .env files automatically
 - **Smart tmux layout**: Adjusts layout based on number of panes
 - **Claude automation**: Launches Claude and runs gw-iss-run automatically
-- **Model selection**: Choose between Opus (default) or Sonnet for all instances
+- **Model selection**: Choose between deepseek-reasoner (default) or deepseek-chat for all instances
 - **Session management**: Reuses or recreates tmux sessions
 
 ## Tmux Layouts
