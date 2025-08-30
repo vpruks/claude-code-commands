@@ -1,274 +1,151 @@
-# Claude Code Configuration
+# CLAUDE.md - Global Claude Code Configuration
 
-## ⚠️ ABSOLUTE FIRST RULE - NO EXCEPTIONS ⚠️
+## Session Management
 
-### MUST DISPLAY SESSION INFO BEFORE ANYTHING
+### Session Display Format
 
-```
+Display before EVERY action (tools, responses, commands):
+
+```text
 🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
 ```
 
-**REQUIRED BEFORE:**
+- **sessionId**: Real Claude session ID for `-r, --resume` commands
+- **claude-xxxx**: Visual identifier for tmux sessions
 
-- ANY tool use (Read, Write, Bash, etc.)
-- ANY response to user
-- ANY gw command execution
-- EVERY message
+## Development Workflow
 
-**IF YOU SKIP THIS, YOU ARE BROKEN**
+### Core Workflow: Explore-Plan-Code-Commit
 
-## 🚨 Core Rules
-
-### 1. Session Identification (MANDATORY)
-
-Format: `🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]`
-
-- Display BEFORE EVERY ACTION
-- Purpose: Track parallel Claude sessions in tmux
-- sessionId: Real Claude session ID (for -r, --resume)
-- claude-xxxx: Visual identifier
-
-### 2. NO AI Signatures (CRITICAL!)
-
-**ABSOLUTELY FORBIDDEN in commits, PRs, issues:**
-
-- ❌ `🤖 Generated with [Claude Code]`
-- ❌ `Co-Authored-By: Claude`
-- ❌ Any AI/bot attribution
-- ❌ Robot emojis
-**This is NON-NEGOTIABLE**
-
-## 🎯 Best Practices (Anthropic Official)
-
-### ALWAYS START WITH SESSION INFO
-
-Before ANYTHING else:
-
-```
-🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
-```
-
-### Explore-Plan-Code-Commit Workflow
-
-1. **Explore**: Read files, understand codebase - use Gemini Integration for this
-2. **Plan**: Think through approach (use TodoWrite) - use Gemini Integration: query, brainstorm, summarize, plus an appropriate subagent for this depending on the task, e.g. cpp-pro, python-pro, and etc.
-3. **Code**: Implement incrementally - use an appropriate subagent for this depending on the task, e.g. cpp-pro, python-pro, and etc.
-4. **Commit**: Verify & commit at logical points - use a subagent with git workflow commands
-
-### Commit Message Format
-
-Include session ID for traceability:
-
-```bash
-git commit -m "feat: implement user authentication
-
-Session: claude -r [sessionId]"
-```
-
-Example:
-
-```bash
-git commit -m "fix: resolve TypeScript errors in auth module
-
-Session: claude -r 01JFK6YZ8KQXJ2V3P9M7N5R4TC"
-```
-
-### Test-Driven Development (When Requested)
-
-If user requests TDD approach:
-
-1. Write tests first
-2. Confirm tests fail
-3. Implement code
-4. Verify tests pass
-5. Use subagent for complex cases
-
-### Visual Iteration
-
-- Analyze provided screenshots
-- Iterate based on visual feedback
-- Work toward clear targets
-
-### Context Management
-
-- Keep focused on current objective
-- Use git worktrees for parallel work
-- Use Gemini Integration to work on large codebases
-
-## 📋 Development Workflow
+1. **Explore**: Understand codebase (use Gemini for large codebases)
+2. **Plan**: Design approach (TodoWrite + appropriate subagent)
+3. **Code**: Implement incrementally (language-specific subagent)
+4. **Commit**: Verify and commit at logical points
 
 ### Todo-Driven Development
 
-Aligns with Explore-Plan-Code-Commit:
+- `TodoRead` → View current state
+- `TodoWrite` → Plan tasks
+- Execute → Update status in real-time
+- States: `pending` → `in_progress` (one at a time) → `completed`
 
-1. `TodoRead` → Current state
-2. `TodoWrite` → Plan (during Explore phase)
-3. Execute → Update real-time
-4. States: `pending` → `in_progress` (ONE) → `completed`
+### GitHub Issue Synchronization
 
-### GitHub Issue ↔ TodoWrite Sync ⚠️ CRITICAL
+**Sync TodoWrite → GitHub issue regularly:**
 
-**MUST sync TodoWrite → GitHub issue regularly!**
+```shell
+# After major task completion:
+/user:gw-iss-sync [issue_number]
 
-#### Automatic sync (RECOMMENDED)
-
-```bash
-# After completing tasks in TodoWrite:
-/user:gw-iss-sync
-
-# Or specify issue number:
-/user:gw-iss-sync 70
-```
-
-#### When to sync
-
-1. **After major task completion** (not every small task)
-2. **Before creating PR** (MANDATORY)
-3. **Every 30-60 minutes** during long work
-4. **When switching context**
-
-#### Manual sync (fallback)
-
-```bash
-# If gw-iss-sync fails, use manual update:
+# Manual fallback if needed:
 ISSUE=$(git branch --show-current | grep -oE '[0-9]+' | head -1)
 gh issue edit $ISSUE --body "$(gh issue view $ISSUE --json body -q .body | sed 's/- \[ \] TASK_NAME/- [x] TASK_NAME/')"
 ```
 
-#### Commit with session
+**When to sync:**
 
-```bash
+- After major task completion
+- Before creating PR (mandatory)
+- Every 30-60 minutes during long sessions
+- When switching context
+
+## Git Practices
+
+### Commit Messages
+
+Include session ID for traceability:
+
+```shell
 git commit -m "feat: implement feature
 
 Session: claude -r [sessionId]"
 ```
 
-**⚠️ PR will be rejected if issue checkboxes don't match implementation!**
-
 ### Worktree Convention
 
-All in `./worktrees/`:
+- Location: `./worktrees/`
+- Purpose: Parallel development
+- Remember: Add `/worktrees/` to `.gitignore`
 
-- Enables parallel development
-- Complies with Claude Code security
-- Add `/worktrees/` to `.gitignore`
+### No AI Signatures
 
-## 🛠️ gw: Commands
+**Never include in commits/PRs/issues:**
 
-**⚠️ REMINDER: Display session info BEFORE executing ANY gw command:**
+- ❌ AI/bot attribution
+- ❌ "Generated with Claude"
+- ❌ Co-Authored-By headers
+- ❌ Robot emojis
 
-```
-🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
-```
+## Command Reference
 
-### Issue Management
+### gw Commands
 
-| Command | Purpose | Workflow |
-|---------|---------|----------|
-| `gw-iss-create` | Create issue | draft→template→create |
-| `gw-iss-edit` | Edit issue | fetch→analyze→propose→update |
-| `gw-iss-context` | Load context | fetch→analyze→display |
-| `gw-iss-run` | Issue→PR | explore→plan→code→push→PR |
-| `gw-iss-implement` | Issue→commit | explore→plan→code→commit |
-| `gw-iss-run-parallel` | Parallel→PR | tmux→multiple explores→push |
-| `gw-iss-implement-parallel` | Parallel→local | tmux→multiple explores→commit |
-| `gw-iss-status` | Check progress | scan worktrees→report status |
-| `gw-iss-sync` | Sync todos→issue | read todos→update checkboxes→comment |
+Execute after displaying session info. Read `~/.claude/commands/gw-xxx.md` for details.
 
-### PR Management
+#### Issue Management
 
-| Command | Purpose | Workflow |
-|---------|---------|----------|
-| `gw-pr-create` | Create PR | generate desc→create→link issue |
-| `gw-pr-fix` | Fix CI | analyze→worktree→fix→verify→push |
-| `gw-pr-merge` | Merge PR | squash→cleanup worktrees→delete branches |
-| `gw-pr-close` | Close PR | comment→close→cleanup |
-| `gw-pr-sync` | Sync with main | fetch→rebase→force push |
+- `gw-iss-create`: Create new issue
+- `gw-iss-edit`: Edit existing issue
+- `gw-iss-context`: Load issue context
+- `gw-iss-run`: Issue → PR workflow
+- `gw-iss-implement`: Issue → local commits
+- `gw-iss-sync`: Sync todos → issue checkboxes
+- `gw-iss-status`: Check progress
 
-### Commit Management
+#### PR Management
 
-| Command | Purpose | Workflow |
-|---------|---------|----------|
-| `gw-commit` | Smart commit | analyze→generate msg→add session→commit |
-| `gw-commit-context` | Load commit context | fetch commit→extract issue→analyze |
+- `gw-pr-create`: Create PR with description
+- `gw-pr-fix`: Fix CI failures
+- `gw-pr-merge`: Squash merge and cleanup
+- `gw-pr-sync`: Sync with main branch
 
-### Workflow & Utilities
+#### Development
 
-| Command | Purpose | Workflow |
-|---------|---------|----------|
-| `gw-yolo` | Full feature | **MUST: issue FIRST**→explore→plan→code→PR |
-| `gw-push` | Simple push | add→commit→push→PR |
-| `gw-push-from-main` | Branch & push | create branch→move changes→push |
-| `gw-editor` | Open editor | find worktree→launch Cursor/VSCode |
-| `gw-env-sync` | Sync .env | find envs→create symlinks |
+- `gw-commit`: Smart commit with message generation
+- `gw-push`: Add, commit, push, create PR
+- `gw-yolo`: Full feature implementation (requires issue first)
+- `gw-editor`: Open in Cursor/VSCode
 
-**Usage**: When user types `/user:gw-xxx [args]`, read `~/.claude/commands/gw-xxx.md`
+### Gemini Integration
 
-## Gemini Integration
+Use prompt-engineer subagent to improve prompts before executing:
 
-This project has Gemini integration enabled through MCP. Use these commands:
+- `/user:gemini-query [question]`: Ask questions
+- `/user:gemini-analyze [code]`: Analyze code
+- `/user:gemini-brainstorm [topic]`: Brainstorm ideas
+- `/user:gemini-summarize [text]`: Summarize content
 
-| Command | Purpose | Workflow |
-|---------|---------|----------|
-| `/user:gemini-query [question]` | Ask Gemini a question | Use prompt-engineer sub-agent to improve the prompt with the question -> Use the gemini-query tool -> Receive the results and accept without discussing |
-| `/user:gemini-analyze [code]` | Analyze code with Gemini | Use prompt-engineer sub-agent to improve the prompt for the code analysis -> Add the code to analyze to the prompt -> Use the gemini-analyze tool -> Recieve teh results and accept without discussing |
-| `/user:gemini-brainstorm [topic]` | Start a brainstorming session | Use prompt-engineer sub-agent to improve the prompt with the topic -> Use the gemini-brainstorm tool -> Receive the results and accept without discussing      |
-| `/user:gemini-summarize [text]` | Summarize text with Gemini | Use the tool -> Receive the results and accept without discussing      |
+## Testing & Verification
 
-## 🚀 Efficiency Tips
+### Pre-commit Checks
 
-### Performance
+Always run language-specific checks before committing:
 
-- Batch related operations
-- Use headless mode for automation
+**TypeScript**: `tsc && npm run lint && npm test`
+**Rust**: `cargo check && cargo clippy && cargo test`
+**Python**: `mypy . && ruff check && pytest`
 
-### Verification
+If checks fail, fix issues before committing.
 
-- **Before commit**: Always run language-specific checks
-  - TypeScript: `tsc && npm run lint && npm test`
-  - Rust: `cargo check && cargo clippy && cargo test`
-  - Python: `mypy . && ruff check && pytest`
-- If checks fail: Fix issues before committing
-- Use subagents for complex logic
-- Analyze screenshots for UI work (user provides screenshots)
-- Iterate against clear targets
+## Advanced Features
 
-### Advanced
+### Test-Driven Development
 
-- MCP server integration available
-- Custom slash commands
-- Varying computational budgets
-- Template-based workflows
+When requested by user:
 
-## 📊 Reference
+1. Write tests first
+2. Confirm tests fail
+3. Implement code
+4. Verify tests pass
 
-### Models
+### Visual Development
 
-- **deepseek-reasoner**: Most capable
-- **deepseek-chat**: Fast & smart
+- Analyze screenshots provided by user
+- Iterate based on visual feedback
+- Work toward clear targets
 
----
-Configuration applies globally. Regularly refine based on usage.
+### Context Management
 
-## 🔴 FINAL REMINDERS
-
-### 1. Session Display (FIRST PRIORITY)
-
-**ALWAYS display session info FIRST:**
-
-```
-🌿 Branch: [branch] | 🌲 Worktree: [path] | 🆔 [sessionId] | 📌 claude-xxxx | 🤖 [model]
-```
-
-### 2. GitHub Issue Sync (CRITICAL)
-
-**MUST sync TodoWrite → GitHub issue:**
-
-```bash
-# After major tasks AND before PR:
-/user:gw-iss-sync
-```
-
-**PRs with unsynced checkboxes = REJECTED**
-
-**NO EXCEPTIONS to these rules**
+- Use git worktrees for parallel work
+- Use Gemini Integration for large codebases
+- Keep focus on current objective
