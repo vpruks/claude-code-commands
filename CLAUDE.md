@@ -208,10 +208,12 @@ All in `./worktrees/`:
 
 This project has Gemini integration enabled through MCP. Use these commands:
 
-- `/user:gemini-query [question]` - Ask Gemini a question
-- `/user:gemini-analyze [code]` - Analyze code with Gemini
-- `/user:gemini-brainstorm [topic]` - Start a brainstorming session
-- `/user:gemini-summarize [text]` - Summarize text with Gemini
+| Command | Purpose | Workflow |
+|---------|---------|----------|
+| `/user:gemini-query [question]` | Ask Gemini a question | Use prompt-engineer sub-agent to improve the prompt with the question -> Use the gemini-query tool -> Receive the results and accept without discussing |
+| `/user:gemini-analyze [code]` | Analyze code with Gemini | Use prompt-engineer sub-agent to improve the prompt for the code analysis -> Add the code to analyze to the prompt -> Use the gemini-analyze tool -> Recieve teh results and accept without discussing |
+| `/user:gemini-brainstorm [topic]` | Start a brainstorming session | Use prompt-engineer sub-agent to improve the prompt with the topic -> Use the gemini-brainstorm tool -> Receive the results and accept without discussing      |
+| `/user:gemini-summarize [text]` | Summarize text with Gemini | Use the tool -> Receive the results and accept without discussing      |
 
 ## 🚀 Efficiency Tips
 
